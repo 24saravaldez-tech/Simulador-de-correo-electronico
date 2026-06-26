@@ -1,3 +1,10 @@
+class Nodo {
+    constructor(value) {
+        this.value = value;
+        this.next = null
+    }
+}
+
 class Correos {
     #destinatario;
     #remitente;
@@ -11,6 +18,10 @@ class Correos {
         this.#asunto = asunto
         this.#mensaje = mensaje
         this.#numero = numero
+
+        this.first = null;
+        this.last = null;
+        this.length = 0;
     }
 
     get destinatario() {
@@ -34,17 +45,38 @@ class Correos {
     }
 
     enEspera(correosGuardados) {
+        let nuevaCola = new Nodo(correosGuardados)
         botonEnivar.addEventListener('click', (event) => {
-            correosGuardados = correosGuardados.shift()
-
+            nuevaCola = correosGuardados.shift()
         })
     }
 
     porEnviar(correosGuardados) {
+        let nuevaCola = new Nodo(correosGuardados)
+        const holdingPointer = correosGuardados.first;
+        correosGuardados.first = correosGuardados.first.next;
 
+        correosGuardados.length--;
+        return holdingPointer;
+
+        let html = ''
+        html += `<div class="mail-card p-3 w-100 position-relative mb-2">
+                        <span class="mail-id">#${holdingPointer.numero}</span>
+                        <h4 class="fs-6 mb-1 text-truncate">Asunto:${holdingPointer.asunto}</h4>
+                        <div class="small text-light">
+                         <p class="m-0 mb-2"><span class="text-purple-novo">No.Correo:</span> ${holdingPointer.numero}</p>
+                            <p class="m-0 mb-1"><span class="text-purple-novo">De:</span>${holdingPointer.destinatario}</p>
+                            <p class="m-0 mb-2"><span class="text-purple-novo">Para:</span> ${holdingPointer.remitente}</p>
+                        </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <button id="btn-send" class="btn-send-gmail px-4 py-2">Enviar</button>
+                </div>
+                </div>`
+
+
+        colaDeEspera.innerHTML = html
     }
 }
-
 
 let redactarNuevoCorreo = document.querySelector('.redactar')
 let popUp = document.querySelector('#gmail-popup')
@@ -91,6 +123,7 @@ function renderizar() {
                     <button id="btn-send" class="btn-send-gmail px-4 py-2">Enviar</button>
                 </div>
                 </div>`
+            correo.porEnviar(correo)
         } else {
             html += `<div class="mail-card p-3 w-100 position-relative mb-2">
                         <span class="mail-id">#${correo.numero}</span>
@@ -101,7 +134,7 @@ function renderizar() {
                             <p class="m-0 mb-2"><span class="text-purple-novo">Para:</span> ${correo.remitente}</p>
                         </div>
                 </div>`
-        correo.porEnviar()
+            correo.enEspera(controlCorreos)
         }
     }
 
