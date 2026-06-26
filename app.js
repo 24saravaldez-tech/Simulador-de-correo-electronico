@@ -11,13 +11,15 @@ class Correos {
     #asunto;
     #mensaje;
     #numero;
+    #estado;
 
-    constructor(destinatario, remitente, asunto, mensaje, numero) {
+    constructor(destinatario, remitente, asunto, mensaje, numero, estado) {
         this.#destinatario = destinatario
         this.#remitente = remitente
         this.#asunto = asunto
         this.#mensaje = mensaje
         this.#numero = numero
+        this.#estado = estado
 
         this.first = null;
         this.last = null;
@@ -42,6 +44,10 @@ class Correos {
 
     get numero() {
         return this.#numero
+    }
+
+    get estado() {
+        return this.#estado
     }
 }
 
@@ -82,23 +88,43 @@ let redactarNuevoCorreo = document.querySelector('.redactar')
 let popUp = document.querySelector('#gmail-popup')
 let cerrarX = document.querySelector('#btn-close-composer')
 let agregarALaCola = document.querySelector('#mail-form')
-// let quienLomanda = document.querySelector('#remitente')
-// let aQuienLlega = document.querySelector('#destinatario')
-let botonEnviar = document.querySelector('#btn-send')
 let colaDeEspera = document.querySelector('#queue-list')
 let contenedorCorreosActuales = document.querySelector('#current-mail')
 let historialLista = document.querySelector('#history-list')
 let contenedorSiguienteCorreo = document.querySelector('#next-mail')
 let cantidad = document.querySelector('#counter-badge')
 let contadorDeLaCola = document.querySelector('#queue-count')
+
+let colaDeCorreos = new ControlDeCorreos() //creo la instancia del control de correos para poder separar las acciones individuales de los correos de las acciones conjuntas de las colas.
+let colaHistorial = new ControlDeCorreos() //para el historial, va a ser el mismo sistema pero con la idea de que se van formando segun se van enviando.
+
+let controlCorreos = []
+
 let banderita = false
 let estaEnviando = false
 
 let contador = 1
-let colaHistorial = new ControlDeCorreos() //para el historial, va a ser el mismo sistema pero con la idea de que se van formando segun se van enviando.
-let controlCorreos = []
-let colaDeCorreos = new ControlDeCorreos() //creo la instancia del control de correos para poder separar las acciones individuales de los correos de las acciones conjuntas de las colas.
 
+
+//LOGICA PARA ESCOGER UN ESTADO
+//========================================================================================
+
+function escogerEstado() {
+    let indice = Math.floor(Math.random() * 3) + 1
+    console.log(indice)
+    if (indice == 1) {
+        return 'Envio exitoso'
+    } else if (indice == 2) {
+        return 'Reintentar envio'
+    } else if (indice == 3) {
+        return 'Envio fallido'
+    }
+}
+//========================================================================================
+
+
+//LOGICA PARA REDACTAR UN CORREO Y PARA CERRAR O ABRIR EL PUPOP
+//========================================================================================
 redactarNuevoCorreo.addEventListener('click', (event) => {
     popUp.classList.remove('d-none') //cuando se da en redactar correo, se abre o aparece el popup
 })
@@ -106,83 +132,155 @@ redactarNuevoCorreo.addEventListener('click', (event) => {
 cerrarX.addEventListener('click', (event) => {
     popUp.classList.add('d-none') //si se le da en la x, cierra el popup
 })
+//========================================================================================
 
+
+//LOGICA PARA AGREGAR A LA COLA DE ESPERA, DONDE ESPERAN A SER ENVIADOS
+//========================================================================================
 agregarALaCola.addEventListener('submit', (event) => {
-    event.preventDefault(); //se le da el prevent default a todo el formulario para que no de problemas de recargas la pagina. Darle el pevent default a los botones de nada sirve pues el evento defavult es propio del formulario.
-    let correoUsuario = new Correos(event.target.destinatario.value, event.target.remitente.value, event.target.asunto.value, event.target.mensaje.value, contador++)
-    controlCorreos.push(correoUsuario)
+    event.preventDefault();
+    //se le da el prevent default a todo el formulario para que no de problemas de 
+    // recargas la pagina. Darle el pevent default a los botones de nada sirve pues 
+    // el evento defavult es propio del formulario.
+
+    let correoUsuario = new Correos(event.target.destinatario.value,
+        event.target.remitente.value,
+        event.target.asunto.value,
+        event.target.mensaje.value,
+        contador++,
+        escogerEstado())
+
+    controlCorreos.push(correoUsuario) //para ver que este tomando los datos correctos.
     colaDeCorreos.enEspera(correoUsuario) //meto el correo del usuario, el que acaba de crear, a la fila de correos para ahorrarnos pleitos.
-    popUp.classList.add('d-none')
-    agregarALaCola.reset()
-    renderizar();
-});
+    popUp.classList.add('d-none') //cierro el pupop
+    agregarALaCola.reset() //reseteo el popup
 
-botonEnviar.addEventListener('click', () => {
-    let correoPorEnviarse = colaDeCorreos.porEnviar();
-
-    if (correoPorEnviarse) {
-        //aqui iria el sonidito de enviado
-        contenedorCorreosActuales.innerHTML = `
-            <div class="mail-card p-3 w-100 position-relative status-success">
-                <span class="mail-id">#${correoPorEnviarse.numero}</span>
-                <h4 class="fs-6 mb-1 text-truncate">Asunto: ${correoPorEnviarse.asunto}</h4>
-                <p class="m-0 small text-muted">Enviado con éxito a: ${correoPorEnviarse.destinatario}</p>
-            </div>
-
-        `
-        renderizar() // renderizo la cola de espera para removerlo visualmente
-    } else {
-        contenedorCorreosActuales.innerHTML = `<p class="m-0 text-muted italic">No hay correos en la cola para enviar</p>`;
-    }
-});
+    renderizar() //renderizo de nuevo.
+})
+//========================================================================================
 
 
-
+//LOGICA PARA REDACTAR UN CORREO Y PARA CERRAR O ABRIR EL PUPOP
+//========================================================================================
 function enviar() {
-    contenedorCorreosActuales.innerHTML = 'No se esta enviando nada'
 
     if (banderita) {
         return // si ya hay un correo enviandose, no hace absolutmente nada
     }
 
     banderita = true;
-    let correoAEnviar = colaDeCorreos.first// busco cual es el primero
+    let correoAPuntoDeEnviarse = colaDeCorreos.first// busco cual es el primero
 
-    let correoEnviado = colaDeCorreos.porEnviar() //una vez pasado el tiempo, lo saco de la cola
+    let correoEnviado = colaDeCorreos.porEnviar(correoAPuntoDeEnviarse) //una vez pasado el tiempo, lo saco de la cola
     if (correoEnviado) {
         colaHistorial.enEspera(correoEnviado)//entra al historial de enviados
-        estaEnviando = true
+
         contenedorCorreosActuales.innerHTML = `
-                <div class="p-2 alert alert-success m-0 text-center">
-                    Enviado con éxito.
-                </div>`;
+                        <div class="p-2 alert alert-warning m-0 text-center">
+                            <strong>Enviando #${correoEnviado.numero}...</strong>
+                            <div class="spinner-border spinner-border-sm text-warning ms-2" role="status"></div>
+                        </div>`
+
+        let estadoSetTimeOut;
+        console.log(correoEnviado.estado)
+        if (correoEnviado.estado == 'Envio exitoso') {
+            estadoSetTimeOut = `<div class="p-2 alert alert-success m-0 text-center">
+                    ${correoEnviado.estado}
+                </div>`
+        } else if (correoEnviado.estado == 'Reintentar envio') {
+            estadoSetTimeOut = `<div class="p-2 alert alert-info m-0 text-center">
+                     ${correoEnviado.estado}
+                </div>`
+        } else if (correoEnviado.estado == 'Envio fallido') {
+            estadoSetTimeOut = `<div class="p-2 alert alert-danger m-0 text-center">
+                    ${correoEnviado.estado}
+                 </div>`
+        }
+
+        setTimeout(() => { //para darle show de tiempo de envio.
+            // actualizo el panel central para indicar que se está procesando
+            contenedorCorreosActuales.innerHTML = estadoSetTimeOut
+        }, 2000)
+
+        renderizar() // renderizo de nuevo para que el boton se borre durante el envío
+        estaEnviando = true
 
         setTimeout(() => {
-            banderita = false // banderita pasa a false lo que indica que ya se pude enviar el siguiente
-            estaEnviando = false
-            renderizar()// volvemos a renderizar.
-            contenedorCorreosActuales.innerHTML = 'No se esta enviando nada'
-        }, 2000)
+            contenedorCorreosActuales.innerHTML = `<div id="current-mail" class="mail-card-placeholder p-3 text-center">
+                                <p class="m-0">No hay correos procesándose en este momento</p>
+                            </div>`
+        }, 4000)
+
+        banderita = false // banderita pasa a false lo que indica que ya se pude enviar el siguiente
+
+        estaEnviando = false //ya termino el envio luego de tanto setTimeOt, asi que ya pasa a decir que no esta enviando.
+        renderizar()// volvemos a renderizar.
+
     }
     estaEnviando = true
-    // setTimeout(() => { //para darle show de tiempo de envio.
-    //     // actualizo el panel central para indicar que se está procesando
-    //     contenedorCorreosActuales.innerHTML = `
-    //     <div class="p-2 alert alert-warning m-0 text-center">
-    //         <strong>Enviando #${correoAEnviar.numero}...</strong>
-    //         <div class="spinner-border spinner-border-sm text-warning ms-2" role="status"></div>
-    //     </div>`
 
-    //     renderizar() // renderizo de nuevo para que el boton se borre durante el envío
-
-    //     
-    // }, 2000)
 }
+//========================================================================================
 
 
 function renderizar() {
+
     cantidad.textContent = colaDeCorreos.length;
     contadorDeLaCola.textContent = colaDeCorreos.length;
+
+    let siguienteCorreo = estaEnviando && colaDeCorreos.first ? colaDeCorreos.first.next : colaDeCorreos.first; // El siguiente sera el segundo en la cola si el primero se esta enviando
+
+    let htmlDeSiguienteCorreo = ''
+    if (siguienteCorreo) {
+        htmlDeSiguienteCorreo = `
+            <div class="p-2 bg-dark rounded">
+                <strong>#${siguienteCorreo.value.numero}</strong> - ${siguienteCorreo.value.asunto}
+            </div>`
+
+        contenedorSiguienteCorreo.innerHTML = htmlDeSiguienteCorreo
+
+    } else {
+        htmlDeSiguienteCorreo = `<p class="m-0">Cola vacía</p>`
+        contenedorSiguienteCorreo.innerHTML = htmlDeSiguienteCorreo
+    }
+
+
+    setTimeout(() => {
+        let htmlHistorial = '';
+        let actualHistorial = colaHistorial.first;
+
+        while (actualHistorial) {
+            let correo = actualHistorial.value;
+            htmlHistorial += `
+            <div class="mail-card p-3 w-100 position-relative mb-2" style="opacity: 0.7;">
+                <span class="mail-id text-success">✓ #${correo.numero}</span>
+                <h4 class="fs-6 mb-1 text-truncate text-white">Asunto: ${correo.asunto}</h4>
+                <div class="small text-white">
+                    <p class="m-0"><span class="text-purple-novo">Para:</span> ${correo.destinatario}</p>
+                </div>
+                <div class="small text-white">
+                    <p class="m-0"><span class="text-purple-novo">De:</span> ${correo.remitente}</p>
+                </div>
+                <div class="small text-white">
+                    <p class="m-0"><span class="text-purple-novo">Estado:</span> ${correo.estado}</p>
+                </div>
+            </div>`;
+
+            actualHistorial = actualHistorial.next;
+        }
+
+        if (historialLista.innerHTML = htmlHistorial) {
+            htmlHistorial
+        } else {
+            historialLista.innerHTML = `<p class="text-muted text-center m-0">Sin envíos</p>`
+        }
+
+        if (colaHistorial.length == 0 && !estaEnviando) {
+            contenedorCorreosActuales.innerHTML = '<p class="m-0 text-center">No hay correos procesándose</p>'
+        }
+
+    }, 5000)
+
 
     let html = '';
     let actual = colaDeCorreos.first// voy haciendolo de la cabeza para la cola
@@ -199,7 +297,6 @@ function renderizar() {
                     <button id="btn-send-inline" class="btn-send-gmail px-3 py-1 bg-success border-0 text-white rounded">Enviar Ahora</button>
                 </div>`;
         } else if (banderitaEsPrimero && estaEnviando) {
-            // si el primero se eesta enviando, muestro un estado de desabilitado
             botonHTML = ` 
                 <div class="d-flex justify-content-end align-items-center mt-2">
                     <button id="btn-send-inline" class="btn-send-gmail px-3 py-1 bg-success border-0 text-white rounded">Enviar Ahora</button>
@@ -228,58 +325,5 @@ function renderizar() {
         btnEnvio.addEventListener('click', enviar)
     }
 
-    let siguienteCorreo = !estaEnviando && colaDeEspera.first ? colaDeEspera.first.next : colaDeEspera.first; // El siguiente sera el segundo en la cola si el primero se esta enviando
-
-    let htmlDeSiguienteCorreo = ''
-    if (siguienteCorreo) {
-        htmlDeSiguienteCorreo = `
-            <div class="p-2 bg-dark rounded">
-                <strong>#${siguienteCorreo.value.numero}</strong> - ${siguienteCorreo.value.asunto}
-            </div>`
-
-            contenedorSiguienteCorreo.innerHTML = htmlDeSiguienteCorreo
-
-    } else {
-        htmlDeSiguienteCorreo = `<p class="m-0">Cola vacía</p>`
-        contenedorSiguienteCorreo.innerHTML = htmlDeSiguienteCorreo
-    }
-
-    let htmlHistorial = '';
-    let actualHistorial = colaHistorial.first;
-
-    while (actualHistorial) {
-        let correo = actualHistorial.value;
-        htmlHistorial += `
-            <div class="mail-card p-3 w-100 position-relative mb-2" style="opacity: 0.7;">
-                <span class="mail-id text-success">✓ #${correo.numero}</span>
-                <h4 class="fs-6 mb-1 text-truncate text-muted">Asunto: ${correo.asunto}</h4>
-                <div class="small text-muted">
-                    <p class="m-0"><span class="text-purple-novo">Para:</span> ${correo.destinatario}</p>
-                </div>
-            </div>`;
-
-
-        // if (!actualHistorial.next && !estaEnviando) { //coloco el ultimo en la lista
-        //     setTimeout(() => {
-        //         contenedorCorreosActuales.innerHTML = `
-        //         <div class="p-2 alert alert-success m-0 text-center">
-        //             <strong>${correo.numero}</strong> Enviado con éxito.
-        //         </div>`;
-        //     }, 2000)
-
-        // }
-
-        actualHistorial = actualHistorial.next;
-    }
-
-    if (historialLista.innerHTML = htmlHistorial) {
-        htmlHistorial
-    } else {
-        historialLista.innerHTML = `<p class="text-muted text-center m-0">Sin envíos</p>`
-    }
-
-    if (colaHistorial.length == 0 && !estaEnviando) {
-        contenedorCorreosActuales.innerHTML = '<p class="m-0 text-center">No hay correos procesándose</p>'
-    }
 }
 
