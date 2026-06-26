@@ -1,0 +1,266 @@
+/* --- VARIABLES DE COLOR (Paleta Oscura, Morados y Lilas) --- */
+:root {
+    --bg-main: #0B0A0F;
+    /* Negro profundo de fondo */
+    --bg-panel: #13111C;
+    /* Gris ultra oscuro con matiz morado */
+    --bg-input: #1C1929;
+    /* Fondo para inputs y tarjetas */
+    --accent-glow: #A855F7;
+    /* Lila vibrante para acentos */
+    --accent-muted: #6B21A8;
+    /* Morado oscuro */
+    --text-main: #F3F4F6;
+    /* Blanco roto/Gris claro */
+    --text-muted: #9CA3AF;
+    /* Gris para descripciones y placeholders */
+    --border-color: #26213B;
+    /* Bordes sutiles */
+
+    /* Estados de envío [cite: 18] */
+    --color-success: #10B981;
+    /* Enviado correctamente [cite: 19] */
+    --color-failed: #EF4444;
+    /* Fallido [cite: 20] */
+    --color-retry: #F59E0B;
+    /* Reintentar [cite: 21] */
+}
+
+/* --- ESTILOS GENERALES Y FUENTES --- */
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+body {
+    background-color: var(--bg-main) !important;
+    color: var(--text-main) !important;
+    min-height: 100vh;
+}
+
+/* --- HEADER --- */
+.app-header {
+    background-color: var(--bg-panel);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.logo span {
+    color: var(--accent-glow);
+}
+
+.status-badge {
+    background-color: var(--bg-input);
+    border: 1px solid var(--accent-muted);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* --- PANELES --- */
+.panel {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.panel h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-main);
+    border-left: 3px solid var(--accent-glow);
+    padding-left: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.count {
+    background-color: var(--accent-muted);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+/* --- BOTONES PERSONALIZADOS --- */
+.btn-primary-novo {
+    background: linear-gradient(135deg, var(--accent-muted), var(--accent-glow));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn-secondary-novo {
+    background-color: transparent;
+    border: 2px solid var(--accent-glow);
+    color: var(--text-main);
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.btn-secondary-novo:hover {
+    background-color: var(--accent-glow);
+}
+
+.btn-primary-novo:hover,
+.btn-secondary-novo:hover {
+    opacity: 0.9;
+}
+
+/* --- CONTENEDORES DE ESTADO --- */
+.status-box {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.status-box h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.mail-card-placeholder {
+    border: 1px dashed var(--border-color);
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.9rem;
+    border-radius: 6px;
+}
+
+.mail-card {
+    background-color: #0B0A0F;
+    border-radius: 2rem;
+}
+
+/* --- LISTAS DE CORREOS --- */
+.mail-list {
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+/* --- PESTAÑA ESTILO GMAIL (COMPOSER PANE) --- */
+.gmail-composer {
+    position: fixed;
+    bottom: 0;
+    right: 5rem;
+    /* Separado del borde derecho como en Gmail */
+    width: 500px;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    z-index: 1050;
+    overflow: hidden;
+}
+
+.composer-header {
+    background-color: #1A1625;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.btn-close-custom {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.btn-close-custom:hover {
+    color: var(--accent-glow);
+}
+
+/* Customizar Inputs dentro de la pestaña para que no parezcan Bootstrap clásico */
+.form-control-novo {
+    background-color: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    border-radius: 0 !important;
+    padding: 0.6rem 0.4rem !important;
+    box-shadow: none !important;
+}
+
+.form-control-novo:focus {
+    border-bottom: 1px solid var(--accent-glow) !important;
+}
+
+.form-control-novo::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.7;
+}
+
+.text-area-novo {
+    min-height: 180px;
+    resize: none;
+}
+
+.btn-send-gmail {
+    background-color: var(--accent-glow);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    /* Bordes redondeados tipo Gmail */
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* --- CLASES DE ESTADO HISTORIAL (Añadir vía JS) --- */
+.status-success {
+    border-left: 4px solid var(--color-success) !important;
+}
+
+.status-failed {
+    border-left: 4px solid var(--color-failed) !important;
+}
+
+.status-retry {
+    border-left: 4px solid var(--color-retry) !important;
+}
+
+/* --- ACTUALIZACIÓN DE INPUTS EN EL POPUP (style.css) --- */
+
+.form-control-novo {
+    background-color: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    border-radius: 0 !important;
+    padding: 0.6rem 0.4rem !important;
+    box-shadow: none !important;
+
+    /* CORRECCIÓN: Forzar el ancho completo ocupando todo el contenedor */
+    width: 100% !important;
+    display: block;
+}
+
+.form-control-novo:focus {
+    border-bottom: 1px solid var(--accent-glow) !important;
+}
+
+.form-control-novo::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.7;
+}
+
+/* El textarea heredará el 100% de ancho automáticamente ahora */
+.text-area-novo {
+    min-height: 180px;
+    resize: none;
+}
+
+
+.text-purple-novo {
+    color: var(--accent-glow);
+    font-weight: 500;
+}
