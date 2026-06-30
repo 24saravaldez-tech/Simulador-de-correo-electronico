@@ -200,7 +200,7 @@ function enviar() {
 
         let estadoSetTimeOut;
         if (correoEnviado.estado == 'Envio exitoso') {
-            estadoSetTimeOut = `<div class="p-2 alert alert-success m-0 text-center">${correoEnviado.estado}</div>`;
+         estadoSetTimeOut = `<div class="p-2 alert alert-success m-0 text-center">${correoEnviado.estado}</div>`;
         } else if (correoEnviado.estado == 'Reintentar envio') {
             estadoSetTimeOut = `<div class="p-2 alert alert-info m-0 text-center">${correoEnviado.estado}</div>`;
         } else if (correoEnviado.estado == 'Envio fallido') {
@@ -311,12 +311,7 @@ function renderizar() {
                 <div class="d-flex justify-content-end align-items-center mt-2">
                     <button id="btn-send-inline" class="btn-send-gmail px-3 py-1 bg-success border-0 text-white rounded">Enviar Ahora</button>
                 </div>`;
-        } else if (banderitaEsPrimero && estaEnviando) {
-            botonHTML = ` 
-                <div class="d-flex justify-content-end align-items-center mt-2">
-                    <button id="btn-send-inline" class="btn-send-gmail px-3 py-1 bg-success border-0 text-white rounded">Enviar Ahora</button>
-                </div>`;
-        }
+        } 
 
         //el border es para que el primero de la fila se vea bonito, con el border de otro color. Los otros se ven simples 
 
